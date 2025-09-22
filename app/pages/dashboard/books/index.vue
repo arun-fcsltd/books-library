@@ -1,0 +1,111 @@
+<template>
+  <MyBreadcrumb
+    :breadcrumbs="[
+      { name: 'Dashboard', to: '', icon: 'pi pi-home' },
+      { name: 'Books', to: '#' }
+    ]"
+    :actions="[
+      { name: 'Add Book', type: 'link', to: '/dashboard/books/create', icon: 'pi pi-plus' },
+    ]"
+    @action="handleAction"
+  />
+
+  <section
+    class="p-6 bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100 min-h-screen transition-colors duration-300">
+    <div class="flex justify-between items-center">
+      <h1 class="text-xl font-bold mb-6 flex items-center gap-2">
+        Books Dashboard
+      </h1>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <BookCard
+        v-for="book in books"
+        :key="book.id"
+        :book="book"
+        class="bg-gray-100 dark:bg-gray-800 p-4 rounded-xl shadow hover:shadow-lg transition"
+        @delete="(event) => showTemplate(event, book.id)"
+      />
+    </div>
+  </section>
+
+  <!-- confirm popup -->
+  <Toast />
+  <ConfirmPopup group="templating">
+    <template #message="slotProps">
+      <div
+        class="flex flex-col items-center w-full gap-4 border-b border-surface-200 dark:border-surface-700 p-4 mb-4 pb-0">
+        <i :class="slotProps.message.icon" class="!text-6xl text-primary-500"></i>
+        <p>{{ slotProps.message.message }}</p>
+      </div>
+    </template>
+  </ConfirmPopup>
+</template>
+
+<script setup>
+const client = useSupabaseClient()
+import BookCard from '~/components/BookCard.vue'
+import MyBreadcrumb from '~/components/common/MyBreadcrumb.vue';
+import { useConfirm } from "primevue/useconfirm";
+import { useToast } from "primevue/usetoast";
+const books = ref([])
+
+async function fetchBooks() {
+  const { data, error } = await client.from('books').select('*')
+  books.value = data || []
+}
+
+onMounted(() => {
+  fetchBooks()
+})
+
+const handleAction = (action) => {
+  if (action.name === 'Add Book') {
+    alert('Add Book clicked')
+  } else if (action.name === 'Export CSV') {
+    alert('Export CSV clicked')
+  } else if (action.name === 'CSV') {
+    alert('CSV clicked')
+  }
+}
+
+const confirm = useConfirm();
+const toast = useToast();
+
+const showTemplate = (event, id) => {
+  confirm.require({
+    target: event.currentTarget, // ✅ must be a DOM element
+    group: 'templating',
+    message: 'Please confirm to delete this book.',
+    icon: 'pi pi-exclamation-circle',
+    rejectProps: {
+      icon: 'pi pi-times',
+      label: 'Cancel',
+      outlined: true
+    },
+    acceptProps: {
+      icon: 'pi pi-check',
+      label: 'Confirm',
+      severity: 'danger',
+      outlined: true
+
+    },
+    accept: async () => {
+      await deleteBook(id)
+    },
+    reject: () => {
+      toast.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected', life: 3000 });
+    }
+  });
+}
+
+const deleteBook = async (id) => {
+  const { error } = await client.from('books').delete().eq('id', id)
+  if (error) {
+    console.error('Error deleting book:', error)
+  } else {
+    toast.add({ severity: 'success', summary: 'Deleted', detail: 'Book deleted successfully', life: 3000 });
+    fetchBooks()
+  }
+}
+</script>
