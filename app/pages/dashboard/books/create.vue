@@ -1,60 +1,108 @@
 <template>
-    <div class="max-w-2xl mx-auto p-6 space-y-6 bg-white dark:bg-gray-800 rounded-lg shadow">
-        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
-            <i class="pi pi-book text-blue-500"></i> Add Book
-        </h2>
+  <div class="max-w-5xl mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow">
+    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2 mb-6">
+      <i class="pi pi-book text-blue-500"></i> Add Book
+    </h2>
 
+    <!-- Two-column layout -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Left side: Form fields -->
+      <div class="space-y-4">
         <!-- Title -->
-        <InputGroup>
-            <InputGroupAddon>
-                <i class="pi pi-tag text-gray-500"></i>
-            </InputGroupAddon>
-            <InputText v-model="form.title" placeholder="Enter book title" class="w-full" />
-        </InputGroup>
+        <InputText
+          v-model="form.title"
+          placeholder="Enter book title"
+          class="w-full"
+        />
         <small class="text-rose-500" v-if="errors.title">{{ errors.title }}</small>
 
         <!-- Author -->
-        <InputGroup>
-            <InputGroupAddon>
-                <i class="pi pi-user text-gray-500"></i>
-            </InputGroupAddon>
-            <InputText v-model="form.author_name" placeholder="Enter author name" class="w-full" />
-        </InputGroup>
+        <InputText
+          v-model="form.author_name"
+          placeholder="Enter author name"
+          class="w-full"
+        />
         <small class="text-rose-500" v-if="errors.author_name">{{ errors.author_name }}</small>
 
         <!-- Description -->
-        <Textarea v-model="form.description" rows="3" placeholder="Enter book description" class="w-full" />
+        <Textarea
+          v-model="form.description"
+          rows="3"
+          placeholder="Enter book description"
+          class="w-full"
+        />
 
         <!-- Genre -->
-        <MultiSelect v-model="form.genre" showClear :options="booksCategories" optionLabel="name" filter
-            placeholder="Select Tags" :maxSelectedLabels="3" class="w-full" />
+        <MultiSelect
+          v-model="form.genre"
+          showClear
+          :options="booksCategories"
+          optionLabel="name"
+          filter
+          placeholder="Select Tags"
+          :maxSelectedLabels="3"
+          class="w-full"
+        />
 
-        <InputText v-model="form.tags" placeholder="Enter tags, comma separated" class="w-full" />
+        <!-- Tags -->
+        <InputText
+          v-model="form.tags"
+          placeholder="Enter tags, comma separated"
+          class="w-full"
+        />
 
-        <!-- <InputText v-model="form.genre" placeholder="Enter genre" class="w-full" /> -->
-
-        <!-- Thumbnail URL -->
-        <MyUploader v-model="form.thumbnail" :deleteApi="null" uploadUrl="/api/fileupload" :multiple="false"
-            accept="image/*" />
-
-        <!-- Images (comma-separated) -->
-        <MyUploader v-model="form.images" :deleteApi="null" uploadUrl="/api/fileupload" :multiple="true"
-            accept="image/*" />
+        <!-- Published Date -->
+        <DatePicker
+          v-model="form.published_date"
+          class="w-full"
+          placeholder="Select date"
+        />
 
         <!-- Price -->
-        <InputNumber v-model="form.price" mode="decimal" :minFractionDigits="0" :maxFractionDigits="2"
-            placeholder="Enter price" class="w-full" />
+        <InputNumber
+          v-model="form.price"
+          mode="decimal"
+          :minFractionDigits="0"
+          :maxFractionDigits="2"
+          placeholder="Enter price"
+          class="w-full"
+        />
+      </div>
 
-
-        <div class="card flex justify-center">
-
+      <!-- Right side: Uploaders -->
+      <div class="space-y-4">
+        <!-- Thumbnail URL -->
+        <div>
+          <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">Thumbnail</h3>
+          <MyUploader
+            v-model="form.thumbnail"
+            :deleteApi="null"
+            uploadUrl="/api/fileupload"
+            :multiple="false"
+            accept="image/*"
+          />
         </div>
-        <!-- Action Buttons -->
-        <div class="flex justify-end gap-3 mt-4">
-            <Button label="Cancel" severity="secondary" outlined class="p-button-sm" @click="$router.back()" />
-            <Button label="Save" icon="pi pi-check" class="p-button-sm" @click="submitForm" />
+
+        <!-- Images (comma-separated) -->
+        <div>
+          <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">Images</h3>
+          <MyUploader
+            v-model="form.images"
+            :deleteApi="null"
+            uploadUrl="/api/fileupload"
+            :multiple="true"
+            accept="image/*"
+          />
         </div>
+      </div>
     </div>
+
+    <!-- Action Buttons -->
+    <div class="flex justify-end gap-3 mt-6">
+      <Button label="Cancel" severity="secondary" outlined class="p-button-sm" @click="$router.back()" />
+      <Button label="Save" icon="pi pi-check" class="p-button-sm" @click="submitForm" />
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -62,6 +110,7 @@ import { reactive } from "vue";
 import MultiSelect from 'primevue/multiselect';
 import MyUploader from "~/components/MyUploader.vue";
 import Textarea from 'primevue/textarea';
+import DatePicker from 'primevue/datepicker';
 
 import InputNumber from 'primevue/inputnumber';
 import InputText from 'primevue/inputtext';
@@ -84,10 +133,10 @@ const getBooksCategories = async () => {
     } else {
         booksCategories.value = data;
     }
-    
+
 };
 
- onMounted(() => {
+onMounted(() => {
     getBooksCategories();
 })
 
@@ -101,6 +150,8 @@ const form = reactive({
     images: "", // will split by comma
     price: 0,
     tags: "", /// will convert to JSON array
+    published_date: "",
+
 });
 
 const errors = reactive({
@@ -133,11 +184,10 @@ const submitForm = async () => {
     // Prepare tags array
     const categoriesArray = form.genre
         ? form.genre.map(tag => tag.code)
-        : [];
+        : null;
 
 
-        console.log(form.thumbnail);
-
+    console.log(form.thumbnail);
 
     // Submit to API
     const response = await fetch("/api/books", {
@@ -148,18 +198,19 @@ const submitForm = async () => {
             author_name: form.author_name,
             description: form.description,
             genre: categoriesArray,
-            thumbnail: form.thumbnail,
-            images: form.images,
+            thumbnail: form.thumbnail || null,
+            images: form.images || null,
             price: parseFloat(form.price),
             tags: form.tags,
+            published_date: form.published_date
         }),
     });
 
     const data = await response.json();
 
-    if (data.id) {
-        navigateTo(`/dashboard/books`);
-    }
+    // if (data.id) {
+    //     navigateTo(`/dashboard/books`);
+    // }
 };
 
 // image upload

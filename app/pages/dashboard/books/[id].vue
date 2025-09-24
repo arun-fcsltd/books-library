@@ -6,7 +6,7 @@
       class="relative overflow-hidden bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-800 dark:to-purple-800">
       <div class="absolute inset-0 bg-black/20"></div>
       <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-12 items-center">
           <!-- Book Cover -->
           <div class="flex justify-center lg:justify-start">
             <div class="relative group">
@@ -21,7 +21,7 @@
           </div>
 
           <!-- Book Info -->
-          <div class="text-white space-y-6">
+          <div class="text-white space-y-6 col-span-2">
             <div>
               <h1 class="text-4xl md:text-5xl font-bold leading-tight mb-4">
                 {{ book.title }}
@@ -141,7 +141,7 @@
         <!-- Sidebar -->
         <div class="space-y-8">
           <!-- Book Details Card -->
-          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 sticky top-8">
+          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 ">
             <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
               <i class="pi pi-list text-blue-500 mr-3"></i>
               Book Details
@@ -183,10 +183,10 @@
             <div class="space-y-4">
               <div v-for="relatedBook in relatedBooks" :key="relatedBook.id"
                 class="flex space-x-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer">
-                <img :src="relatedBook.cover" :alt="relatedBook.title" class="w-12 h-16 object-cover rounded">
+                <img :src="relatedBook.thumbnail" :alt="relatedBook.title" class="w-12 h-16 object-cover rounded">
                 <div class="flex-1">
                   <h4 class="font-semibold text-gray-900 dark:text-white text-sm">{{ relatedBook.title }}</h4>
-                  <p class="text-gray-600 dark:text-gray-400 text-xs">{{ relatedBook.author }}</p>
+                  <p class="text-gray-600 dark:text-gray-400 text-xs">{{ relatedBook.author_name }}</p>
                   <div class="flex items-center mt-1">
                     <span class="text-yellow-500 text-xs">★</span>
                     <span class="text-gray-500 text-xs ml-1">{{ relatedBook.rating }}</span>
@@ -206,8 +206,9 @@
 
 <script setup>
 import dayjs from 'dayjs'
-
+const client = useSupabaseClient()
 const book = ref({})
+const relatedBooks = ref([])
 const route = useRoute()
 
 // Sample data for enhanced UI
@@ -235,29 +236,7 @@ const sampleReviews = ref([
   }
 ])
 
-const relatedBooks = ref([
-  {
-    id: 1,
-    title: "Advanced Programming Concepts",
-    author: "John Smith",
-    cover: "/api/placeholder/60/80",
-    rating: 4.8
-  },
-  {
-    id: 2,
-    title: "Data Structures Made Easy",
-    author: "Jane Doe",
-    cover: "/api/placeholder/60/80",
-    rating: 4.6
-  },
-  {
-    id: 3,
-    title: "Modern Web Development",
-    author: "Alex Wilson",
-    cover: "/api/placeholder/60/80",
-    rating: 4.9
-  }
-])
+
 
 // Format category names
 const formatCategory = (category) => {
@@ -286,6 +265,23 @@ useHead({
     { name: 'description', content: book.value.description || 'Book details from our college library' }
   ]
 })
+
+//related books
+const fetchRelatedBooks = async () => {
+  try {
+    const { data, error } = await client.from('books').select('*').limit(3)
+    if (error) throw error
+    console.log(data, "related books in this page")
+    relatedBooks.value = data
+    } catch (error) {
+    console.error('Error fetching related books:', error)
+  }
+}
+
+onMounted(() => {
+  fetchRelatedBooks()
+})
+
 </script>
 
 
