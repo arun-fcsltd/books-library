@@ -1,85 +1,146 @@
 <template>
-    <div class="max-w-sm mx-auto p-6 space-y-6 bg-white dark:bg-gray-800 rounded-lg shadow">
-        <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2">
-            <i class="pi pi-book text-blue-500"></i> Add Book
+    <div class="max-w-2xl mx-auto p-6 space-y-6 bg-white dark:bg-gray-800 rounded-lg shadow">
+        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+            <i class="pi pi-book text-blue-500"></i> {{ form.id ? "Edit Book" : "Add Book" }}
         </h2>
 
-        <!-- Title Field -->
+        <!-- Title -->
         <InputGroup>
-            <InputGroupAddon>
-                <i class="pi pi-tag text-gray-500"></i>
-            </InputGroupAddon>
+            <InputGroupAddon><i class="pi pi-tag text-gray-500"></i></InputGroupAddon>
             <InputText v-model="form.title" placeholder="Enter book title" class="w-full" />
         </InputGroup>
         <small class="text-rose-500" v-if="errors.title">{{ errors.title }}</small>
 
-        <!-- Author Field -->
+        <!-- Author -->
         <InputGroup>
-            <InputGroupAddon>
-                <i class="pi pi-user text-gray-500"></i>
-            </InputGroupAddon>
+            <InputGroupAddon><i class="pi pi-user text-gray-500"></i></InputGroupAddon>
             <InputText v-model="form.author_name" placeholder="Enter author name" class="w-full" />
         </InputGroup>
         <small class="text-rose-500" v-if="errors.author_name">{{ errors.author_name }}</small>
 
-        <!-- Action Buttons -->
-        <div class="flex justify-end gap-3">
-            <Button label="Cancel" severity="secondary" outlined class="p-button-sm dark:text-gray-100" @click="$router.back()" />
-            <Button label="Save" icon="pi pi-check" class="p-button-sm" @click="submitForm" />
+        <!-- Description -->
+        <InputTextarea v-model="form.description" rows="3" placeholder="Enter book description" class="w-full" />
+
+        <!-- Genre -->
+        <MultiSelect v-model="form.genre" :options="booksCategories" optionLabel="name" optionValue="code" showClear filter
+            placeholder="Select genres" class="w-full" />
+
+        <!-- Tags -->
+        <InputText v-model="form.tags" placeholder="Enter tags, comma separated" class="w-full" />
+
+        <!-- Thumbnail -->
+        <MyUploader v-model="form.thumbnail" :multiple="false" accept="image/*" uploadUrl="/api/fileupload"
+            :deleteApi="null" />
+
+        <!-- Images -->
+        <MyUploader v-model="form.images" :multiple="true" accept="image/*" uploadUrl="/api/fileupload"
+            :deleteApi="null" />
+
+        <!-- Price -->
+        <InputNumber v-model="form.price" mode="decimal" minFractionDigits="0" maxFractionDigits="2"
+            placeholder="Enter price" class="w-full" />
+
+        <!-- Buttons -->
+        <div class="flex justify-end gap-3 mt-4">
+            <Button label="Cancel" severity="secondary" outlined @click="$router.back()" />
+            <Button label="Save" icon="pi pi-check" @click="submitForm" />
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref, reactive } from "vue";
-const route = useRoute()
+import { reactive, ref, onMounted } from "vue";
+import { useRoute, useRouter, useSupabaseClient } from "#imports";
+import MultiSelect from "primevue/multiselect";
+import MyUploader from "~/components/MyUploader.vue";
+
+const route = useRoute();
+const router = useRouter();
+const client = useSupabaseClient();
+
+const booksCategories = ref([
+    { name: "Fiction", code: "Fiction" },
+    { name: "Non-Fiction", code: "Non-Fiction" },
+    { name: "Romance", code: "Romance" },
+    { name: "Fantasy", code: "Fantasy" },
+]);
+
+// Reactive form
 const form = reactive({
+    id: route.params.id || null,
     title: "",
     author_name: "",
-    id: route.params.id,
+    description: "",
+    genre: [],
+    thumbnail: "",
+    images: [],
+    price: 0,
+    tags: "",
 });
 
-const response = await fetch(`/api/books?id=${route.params.id}`, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        
-    });
-
-    const data = await response.json()
-
-
-if (data){
-    form.title = data.title
-    form.author_name = data.author_name
-}
-
+// Errors
 const errors = reactive({
     title: "",
     author_name: "",
 });
-const submitForm = async () => {
-    console.log("Form submitted:", form);
-  
-    // Submit form data to API
-    const response = await fetch("/api/books", {
-        method: "PUT",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            title: form.title,
-            author_name: form.author_name,
-            id: form.id
-        }),
-    });
-    const data = await response.json();
 
-    // Redirect to book details page
-    if (data.id) {
-        navigateTo(`/dashboard/books/${data.id}`);
+// Fetch book categories
+const getBooksCategories = async () => {
+    const { data, error } = await client.from("books_categories").select();
+    if (error) console.error("Supabase categories error:", error);
+    else booksCategories.value = data;
+};
+
+// Fetch book data if editing
+const fetchBook = async () => {
+    if (!route.params.id) return;
+
+    const res = await fetch(`/api/books?id=${route.params.id}`);
+    const data = await res.json();
+
+    if (data) {
+        form.title = data.title || "";
+        form.author_name = data.author_name || "";
+        form.description = data.description || "";
+        form.price = data.price || 0;
+        form.thumbnail = typeof data.thumbnail === "string" ? JSON.parse(data.thumbnail)[0] : data.thumbnail || "";
+        // Map genre strings to booksCategories objects' code values
+        form.genre = data.genre ? JSON.parse(data.genre).filter(genre =>  booksCategories.value.some(category => category.code === genre)
+        ) : [];
+        form.images = data.images || [];
+        form.tags = data.tags || "";
     }
 };
 
+// Submit form
+const submitForm = async () => {
+    // Validate
+    errors.title = "";
+    errors.author_name = "";
+    if (!form.title) errors.title = "Title is required";
+    if (!form.author_name) errors.author_name = "Author is required";
+    if (errors.title || errors.author_name) return;
+
+    // Prepare payload
+    const payload = {
+        ...form,
+        genre: JSON.stringify(form.genre), // Store as string array
+        thumbnail: JSON.stringify([form.thumbnail]),
+        images: form.images,
+    };
+
+    const res = await fetch("/api/books", {
+        method: form.id ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+
+    if (data.id) router.push(`/dashboard/books/${data.id}`);
+};
+
+onMounted(() => {
+    getBooksCategories();
+    fetchBook();
+});
 </script>

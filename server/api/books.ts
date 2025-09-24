@@ -35,9 +35,8 @@ export default defineEventHandler(async (event) => {
     if (method === 'POST') {
       // Add new book
       const body = await readBody(event)
-      const { data, error } = await client.from('books').insert([
-        { title: body.title, author_name: body.author_name }
-      ] as any).select()
+
+      const { data, error } = await client.from('books').insert(body as any).select()
       if (error) throw error
       return data[0]
     }
@@ -48,7 +47,7 @@ export default defineEventHandler(async (event) => {
       // Correct: pass a single object to update
       const { data, error } = await client.from('books')
         //@ts-ignore
-        .update({ title: body.title, author_name: body.author_name }) // 👈 just an object, not array
+        .update(body) // 👈 just an object, not array
         .eq('id', body.id)
         .select() // select returns the updated row(s)
 
