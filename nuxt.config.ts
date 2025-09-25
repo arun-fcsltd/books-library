@@ -32,15 +32,6 @@ export default defineNuxtConfig({
   css:[
       'primeicons/primeicons.css',
   ],
- runtimeConfig: {
-    // private keys (server only)
-    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
 
-    // public keys (exposed to client)
-    public: {
-      SUPABASE_URL: process.env.SUPABASE_URL,
-      SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,
-    },
-  },
   
 })
