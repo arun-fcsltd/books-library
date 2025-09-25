@@ -29,16 +29,32 @@
         <InputText v-model="form.tags" placeholder="Enter tags, comma separated" class="w-full" />
 
         <!-- Thumbnail -->
-        <MyUploader v-model="form.thumbnail" :multiple="false" accept="image/*" uploadUrl="/api/fileupload"
-            :deleteApi="null" />
+        <MyUploader
+            v-model="form.thumbnail"
+            :deleteApi="null"
+            uploadUrl="/api/fileupload"
+            :multiple="false"
+            accept="image/*"
+          />
 
         <!-- Images -->
-        <MyUploader v-model="form.images" :multiple="true" accept="image/*" uploadUrl="/api/fileupload"
-            :deleteApi="null" />
+       <MyUploader
+            v-model="form.images"
+            :deleteApi="null"
+            uploadUrl="/api/fileupload"
+            :multiple="true"
+            accept="image/*"
+          />
 
         <!-- Price -->
         <InputNumber v-model="form.price" mode="decimal" minFractionDigits="0" maxFractionDigits="2"
             placeholder="Enter price" class="w-full" />
+
+             <DatePicker
+          v-model="form.published_date"
+          class="w-full"
+          placeholder="Select date"
+        />
 
         <!-- Buttons -->
         <div class="flex justify-end gap-3 mt-4">
@@ -53,6 +69,8 @@ import { reactive, ref, onMounted } from "vue";
 import { useRoute, useRouter, useSupabaseClient } from "#imports";
 import MultiSelect from "primevue/multiselect";
 import MyUploader from "~/components/MyUploader.vue";
+import DatePicker from 'primevue/datepicker';
+
 
 const route = useRoute();
 const router = useRouter();
@@ -73,9 +91,10 @@ const form = reactive({
     description: "",
     genre: [],
     thumbnail: "",
-    images: [],
+    images: "", // will split by comma
     price: 0,
     tags: "",
+    published_date: "",
 });
 
 // Errors
@@ -93,9 +112,9 @@ const getBooksCategories = async () => {
 
 // Fetch book data if editing
 const fetchBook = async () => {
-    if (!route.params.id) return;
+    if (!route.params.slug) return;
 
-    const res = await fetch(`/api/books?id=${route.params.id}`);
+    const res = await fetch(`/api/books?slug=${route.params.slug}`);
     const data = await res.json();
 
     if (data) {
@@ -103,12 +122,13 @@ const fetchBook = async () => {
         form.author_name = data.author_name || "";
         form.description = data.description || "";
         form.price = data.price || 0;
-        form.thumbnail = typeof data.thumbnail === "string" ? JSON.parse(data.thumbnail)[0] : data.thumbnail || "";
+        form.thumbnail = data.thumbnail || "";
         // Map genre strings to booksCategories objects' code values
         form.genre = data.genre ? JSON.parse(data.genre).filter(genre =>  booksCategories.value.some(category => category.code === genre)
         ) : [];
         form.images = data.images || [];
         form.tags = data.tags || "";
+        form.published_date = data.published_date || "";
     }
 };
 
@@ -125,7 +145,7 @@ const submitForm = async () => {
     const payload = {
         ...form,
         genre: JSON.stringify(form.genre), // Store as string array
-        thumbnail: JSON.stringify([form.thumbnail]),
+        thumbnail: form.thumbnail,
         images: form.images,
     };
 

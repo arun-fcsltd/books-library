@@ -10,12 +10,12 @@ export default defineEventHandler(async (event) => {
       const query = getQuery(event)
       console.log(query);
 
-      if (query.id) {
+      if (query.slug) {
         // ✅ Fetch single book by ID
         const { data, error } = await client
           .from('books')
           .select('*')
-          .eq('id', query.id as string)
+          .eq('slug', query.slug as string)
           .single()
 
         if (error) throw error

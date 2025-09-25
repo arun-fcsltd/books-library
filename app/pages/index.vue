@@ -38,7 +38,7 @@
           </NuxtLink>
           
           <NuxtLink
-            to="/login"
+            to="/auth/login"
             class="px-8 py-4 border-2 border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400 text-lg font-semibold rounded-2xl shadow-lg hover:bg-blue-600 hover:text-white dark:hover:bg-blue-400 dark:hover:text-gray-900 transition-all duration-300 transform hover:scale-105 backdrop-blur-sm bg-white/50 dark:bg-gray-800/50"
           >
             Login / Register
@@ -80,7 +80,7 @@
         </div>
         
         <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3 mb-12">
-          <BookCard v-for="book in featuredBooks" :key="book.id" :book="book" />
+          <HomeBookCard v-for="book in featuredBooks" :key="book.id" :book="book" />
         </div>
 
         <div class="text-center">
@@ -280,46 +280,31 @@
 </template>
 
 <script setup>
+import HomeBookCard from "~/components/home/HomeBookCard.vue"
+
 definePageMeta({
   layout: 'guest'
 })
 
-// Enhanced book data with more details
-const featuredBooks = [
-  {
-    id: 1,
-    title: "The Great Gatsby",
-    author: "F. Scott Fitzgerald",
-    cover: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=600&fit=crop",
-    description: "A story about the mysterious millionaire Jay Gatsby and his obsession with Daisy Buchanan in the Jazz Age.",
-    category: "Classic Literature",
-    rating: 5,
-    reviews: 1247,
-    available: true
-  },
-  {
-    id: 2,
-    title: "1984",
-    author: "George Orwell",
-    cover: "https://images.unsplash.com/photo-1495640388908-05fa85288e61?w=400&h=600&fit=crop",
-    description: "A dystopian novel set in a totalitarian society ruled by Big Brother, exploring themes of surveillance and freedom.",
-    category: "Dystopian Fiction",
-    rating: 5,
-    reviews: 2156,
-    available: true
-  },
-  {
-    id: 3,
-    title: "To Kill a Mockingbird",
-    author: "Harper Lee",
-    cover: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=600&fit=crop",
-    description: "A powerful novel about racial injustice and childhood innocence in the American South.",
-    category: "American Literature",
-    rating: 4,
-    reviews: 1893,
-    available: false
+const client = useSupabaseClient()
+const featuredBooks = ref([])
+
+onMounted(async () => {
+  const { data, error } = await client
+    .from('books')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(3)
+
+  if (data) {
+    featuredBooks.value = data
+  } else if (error) {
+    console.error(error)
   }
-]
+})
+
+// Enhanced book data with more details
+
 
 const studySpaces = [
   {

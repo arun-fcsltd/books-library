@@ -107,7 +107,7 @@
           </div>
 
           <!-- Reviews Section -->
-          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
+          <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 hidden">
             <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
               <i class="pi pi-star text-yellow-500 mr-3"></i>
               Student Reviews
@@ -162,7 +162,7 @@
               </div>
               <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700">
                 <span class="text-gray-600 dark:text-gray-400">Price</span>
-                <span class="font-semibold text-green-600 dark:text-green-400">${{ book.price || 'Free' }}</span>
+                <span class="font-semibold text-green-600 dark:text-green-400">₹{{ book.price || 'Free' }}</span>
               </div>
               <div class="flex justify-between items-center py-2">
                 <span class="text-gray-600 dark:text-gray-400">Availability</span>
@@ -245,7 +245,7 @@ const formatCategory = (category) => {
 
 // Fetch book data
 try {
-  const response = await fetch(`/api/books?id=${route.params.id}`, {
+  const response = await fetch(`/api/books?slug=${route.params.slug}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",

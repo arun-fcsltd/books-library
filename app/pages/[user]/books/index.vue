@@ -19,12 +19,13 @@
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <BookCard
+      <HomeBookCard
         v-for="book in books"
         :key="book.id"
         :book="book"
         class="bg-gray-100 dark:bg-gray-800 p-4 rounded-xl shadow hover:shadow-lg transition"
         @delete="(event) => showTemplate(event, book.id)"
+        :edit="true"
       />
     </div>
   </section>
@@ -44,7 +45,7 @@
 
 <script setup>
 const client = useSupabaseClient()
-import BookCard from '~/components/BookCard.vue'
+import HomeBookCard from '~/components/home/HomeBookCard.vue'
 import MyBreadcrumb from '~/components/common/MyBreadcrumb.vue';
 import { useConfirm } from "primevue/useconfirm";
 import { useToast } from "primevue/usetoast";
