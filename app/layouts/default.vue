@@ -52,9 +52,30 @@
         </div>
         <div class="flex items-center space-x-4">
           <!-- Color mode switcher -->
-          <div class="">
-            <ToggleButton v-model="isDark" onLabel="🌙" offLabel="☀️" class="" />
-          </div>
+           
+       <div>
+  <ToggleButton
+    v-model="isDark"
+    :onLabel="''"
+    :offLabel="''"
+    class="w-14 h-8 rounded-full relative transition-colors duration-300"
+    :class="isDark 
+      ? 'bg-gray-800 border-gray-700' 
+      : 'bg-yellow-400 border-yellow-300'"
+  >
+    <template #default>
+      <span
+        class="absolute top-1 left-1 w-6 h-6 flex items-center justify-center rounded-full transition-transform duration-300"
+        :class="isDark 
+          ? 'translate-x-6 bg-gray-900 text-white' 
+          : 'translate-x-0 bg-white text-yellow-500'"
+      >
+        {{ isDark ? '🌙' : '☀️' }}
+      </span>
+    </template>
+  </ToggleButton>
+</div>
+
 
           <!-- User avatar -->
           <div class="relative">
@@ -98,6 +119,7 @@
       </main>
     </div>
   </div>
+   <Toast />
 </template>
 
 <script setup>
@@ -106,6 +128,7 @@ import Popover from 'primevue/popover'
 import Button from 'primevue/button'
 import ToggleButton from 'primevue/togglebutton';
 import MyBreadcrumb from '~/components/common/MyBreadcrumb.vue';
+import Toast from "primevue/toast";
 
 const client = useSupabaseClient()
 const user = useSupabaseUser()
@@ -143,3 +166,11 @@ const logout = async () => {
 
 
 </script>
+
+<style scoped>
+
+.p-togglebutton-content, span.p-togglebutton-content {
+  background: #000000!important;
+}
+
+</style>

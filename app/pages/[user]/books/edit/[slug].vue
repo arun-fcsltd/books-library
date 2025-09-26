@@ -19,42 +19,28 @@
         <small class="text-rose-500" v-if="errors.author_name">{{ errors.author_name }}</small>
 
         <!-- Description -->
-        <InputTextarea v-model="form.description" rows="3" placeholder="Enter book description" class="w-full" />
+        <Textarea v-model="form.description" rows="3" placeholder="Enter book description" class="w-full" />
 
         <!-- Genre -->
-        <MultiSelect v-model="form.genre" :options="booksCategories" optionLabel="name" optionValue="code" showClear filter
-            placeholder="Select genres" class="w-full" />
+        <MultiSelect v-model="form.genre" showClear :options="booksCategories" optionLabel="name" filter
+            placeholder="Select Tags" :maxSelectedLabels="3" class="w-full" />
 
         <!-- Tags -->
         <InputText v-model="form.tags" placeholder="Enter tags, comma separated" class="w-full" />
 
         <!-- Thumbnail -->
-        <MyUploader
-            v-model="form.thumbnail"
-            :deleteApi="null"
-            uploadUrl="/api/fileupload"
-            :multiple="false"
-            accept="image/*"
-          />
+        <MyUploader v-model="form.thumbnail" :deleteApi="null" uploadUrl="/api/fileupload" :multiple="false"
+            accept="image/*" />
 
         <!-- Images -->
-       <MyUploader
-            v-model="form.images"
-            :deleteApi="null"
-            uploadUrl="/api/fileupload"
-            :multiple="true"
-            accept="image/*"
-          />
+        <MyUploader v-model="form.images" :deleteApi="null" uploadUrl="/api/fileupload" :multiple="true"
+            accept="image/*" />
 
         <!-- Price -->
         <InputNumber v-model="form.price" mode="decimal" minFractionDigits="0" maxFractionDigits="2"
             placeholder="Enter price" class="w-full" />
 
-             <DatePicker
-          v-model="form.published_date"
-          class="w-full"
-          placeholder="Select date"
-        />
+        <DatePicker v-model="form.published_date" class="w-full" placeholder="Select date" />
 
         <!-- Buttons -->
         <div class="flex justify-end gap-3 mt-4">
@@ -70,6 +56,7 @@ import { useRoute, useRouter, useSupabaseClient } from "#imports";
 import MultiSelect from "primevue/multiselect";
 import MyUploader from "~/components/MyUploader.vue";
 import DatePicker from 'primevue/datepicker';
+import Textarea from 'primevue/textarea';
 
 
 const route = useRoute();
@@ -85,7 +72,7 @@ const booksCategories = ref([
 
 // Reactive form
 const form = reactive({
-    id: route.params.id || null,
+    slug: route.params.slug || null,
     title: "",
     author_name: "",
     description: "",
@@ -124,8 +111,12 @@ const fetchBook = async () => {
         form.price = data.price || 0;
         form.thumbnail = data.thumbnail || "";
         // Map genre strings to booksCategories objects' code values
-        form.genre = data.genre ? JSON.parse(data.genre).filter(genre =>  booksCategories.value.some(category => category.code === genre)
-        ) : [];
+        form.genre = data.genre
+            ? JSON.parse(data.genre) // ["Fiction","Non-Fiction"]
+                .map(g => booksCategories.value.find(c => c.code === g))
+                .filter(Boolean) // remove undefined if not found
+            : [];
+        console.log(JSON.parse(data.genre).filter(genre => booksCategories.value.some(category => category.code === genre)), "data.genre")
         form.images = data.images || [];
         form.tags = data.tags || "";
         form.published_date = data.published_date || "";
@@ -141,22 +132,26 @@ const submitForm = async () => {
     if (!form.author_name) errors.author_name = "Author is required";
     if (errors.title || errors.author_name) return;
 
+    const categoriesArray = form.genre
+        ? form.genre.map((tag) => tag.code)
+        : null;
+
     // Prepare payload
     const payload = {
         ...form,
-        genre: JSON.stringify(form.genre), // Store as string array
+        genre: JSON.stringify(categoriesArray), // Store as string array
         thumbnail: form.thumbnail,
         images: form.images,
     };
 
     const res = await fetch("/api/books", {
-        method: form.id ? "PUT" : "POST",
+        method: form.slug ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
     });
     const data = await res.json();
 
-    if (data.id) router.push(`/dashboard/books/${data.id}`);
+    if (data.slug) router.push(`/dashboard/books/${data.slug}`);
 };
 
 onMounted(() => {

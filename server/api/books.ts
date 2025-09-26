@@ -48,7 +48,7 @@ export default defineEventHandler(async (event) => {
       const { data, error } = await client.from('books')
         //@ts-ignore
         .update(body) // 👈 just an object, not array
-        .eq('id', body.id)
+        .eq('slug', body.slug)
         .select() // select returns the updated row(s)
 
       if (error) throw error

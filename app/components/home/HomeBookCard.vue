@@ -33,7 +33,7 @@
       <p v-if="book.price" class="text-lg font-semibold text-green-600 dark:text-green-400 border border-green-600 dark:border-green-400 px-3 py-1 rounded-full">
         ₹{{ (book.price / 100).toFixed(2) }}
       </p>
-      <p v-else class="text-lg font-semibold text-green-600 dark:text-green-400 border border-green-600 dark:border-green-400 px-3 py-1 rounded-full">Free</p>
+      <p v-else class="text-lg font-semibold text-green-600 dark:text-green-400 ">Free</p>
     </div>
 
     <!-- Actions -->
@@ -52,10 +52,12 @@
           class="text-sm mr-2 px-4 py-2 rounded-lg bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900 dark:text-green-300 dark:hover:bg-green-800 transition font-medium">
           <i class="pi pi-pencil mr-1"></i> Edit
         </NuxtLink>
-          <button @click="$emit('delete', book.id)"
+          <button @click="$emit('delete', book.id)" :loading="true"
         class="text-sm px-4 py-2 rounded-lg bg-red-100 text-red-600 hover:bg-red-200 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-800 transition font-medium">
         <i class="pi pi-trash mr-1"></i> Delete
       </button>
+
+        
 
       </div>
     

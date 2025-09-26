@@ -9,64 +9,36 @@
       <!-- Left side: Form fields -->
       <div class="space-y-4">
         <!-- Title -->
-        <InputText
-          v-model="form.title"
-          placeholder="Enter book title"
-          class="w-full"
-        />
+        <InputText v-model="form.title" placeholder="Enter book title" class="w-full" />
         <small class="text-rose-500" v-if="errors.title">{{ errors.title }}</small>
 
         <!-- Author -->
-        <InputText
-          v-model="form.author_name"
-          placeholder="Enter author name"
-          class="w-full"
-        />
+        <InputText v-model="form.author_name" placeholder="Enter author name" class="w-full" />
         <small class="text-rose-500" v-if="errors.author_name">{{ errors.author_name }}</small>
 
         <!-- Description -->
-        <Textarea
-          v-model="form.description"
-          rows="3"
-          placeholder="Enter book description"
-          class="w-full"
-        />
+        <Textarea v-model="form.description" rows="3" placeholder="Enter book description" class="w-full" />
+        <small class="text-rose-500" v-if="errors.description">{{ errors.description }}</small>
+
 
         <!-- Genre -->
-        <MultiSelect
-          v-model="form.genre"
-          showClear
-          :options="booksCategories"
-          optionLabel="name"
-          filter
-          placeholder="Select Tags"
-          :maxSelectedLabels="3"
-          class="w-full"
-        />
+        <MultiSelect v-model="form.genre" showClear :options="booksCategories" optionLabel="name" filter
+          placeholder="Select Tags" :maxSelectedLabels="3" class="w-full" />
+
+
 
         <!-- Tags -->
-        <InputText
-          v-model="form.tags"
-          placeholder="Enter tags, comma separated"
-          class="w-full"
-        />
+        <InputText v-model="form.tags" placeholder="Enter tags, comma separated" class="w-full" />
+        <small class="text-rose-500" v-if="errors.tags">{{ errors.tags }}</small>
+
 
         <!-- Published Date -->
-        <DatePicker
-          v-model="form.published_date"
-          class="w-full"
-          placeholder="Select date"
-        />
+        <DatePicker v-model="form.published_date" class="w-full" placeholder="Select date" />
+        <small class="text-rose-500" v-if="errors.published_date">{{ errors.published_date }}</small>
 
         <!-- Price -->
-        <InputNumber
-          v-model="form.price"
-          mode="decimal"
-          :minFractionDigits="0"
-          :maxFractionDigits="2"
-          placeholder="Enter price"
-          class="w-full"
-        />
+        <InputNumber v-model="form.price" mode="decimal" :minFractionDigits="0" :maxFractionDigits="2"
+          placeholder="Enter price" class="w-full" />
       </div>
 
       <!-- Right side: Uploaders -->
@@ -74,25 +46,15 @@
         <!-- Thumbnail URL -->
         <div>
           <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">Thumbnail</h3>
-          <MyUploader
-            v-model="form.thumbnail"
-            :deleteApi="null"
-            uploadUrl="/api/fileupload"
-            :multiple="false"
-            accept="image/*"
-          />
+          <MyUploader v-model="form.thumbnail" :deleteApi="null" uploadUrl="/api/fileupload" :multiple="false"
+            accept="image/*" />
         </div>
 
         <!-- Images (comma-separated) -->
         <div>
           <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">Images</h3>
-          <MyUploader
-            v-model="form.images"
-            :deleteApi="null"
-            uploadUrl="/api/fileupload"
-            :multiple="true"
-            accept="image/*"
-          />
+          <MyUploader v-model="form.images" :deleteApi="null" uploadUrl="/api/fileupload" :multiple="true"
+            accept="image/*" />
         </div>
       </div>
     </div>
@@ -100,118 +62,126 @@
     <!-- Action Buttons -->
     <div class="flex justify-end gap-3 mt-6">
       <Button label="Cancel" severity="secondary" outlined class="p-button-sm" @click="$router.back()" />
-      <Button label="Save" icon="pi pi-check" class="p-button-sm" @click="submitForm" />
+      <Button label="Save" icon="pi pi-check" :loading="isSubmitting" class="p-button-sm" @click="submitForm" />
     </div>
   </div>
+  
 </template>
 
 <script setup>
-import { reactive } from "vue";
-import MultiSelect from 'primevue/multiselect';
+import { reactive, ref, watch, onMounted } from "vue";
+import MultiSelect from "primevue/multiselect";
 import MyUploader from "~/components/MyUploader.vue";
-import Textarea from 'primevue/textarea';
-import DatePicker from 'primevue/datepicker';
-
-import InputNumber from 'primevue/inputnumber';
-import InputText from 'primevue/inputtext';
-
-
-
-import { ref } from "vue";
-
-const client = useSupabaseClient()
+import Textarea from "primevue/textarea";
+import DatePicker from "primevue/datepicker";
+import InputNumber from "primevue/inputnumber";
+import InputText from "primevue/inputtext";
+import { useToast } from "primevue/usetoast";
 
 
-// const selectedCities = ref();
-const booksCategories = ref();
+const toast = useToast();
+
+
+const client = useSupabaseClient();
+
+const booksCategories = ref([]);
 
 const getBooksCategories = async () => {
-    const { data, error } = await client.from("books_categories").select()
-    if (error) {
-        console.log(error);
-    } else {
-        booksCategories.value = data;
-    }
-
+  const { data, error } = await client.from("books_categories").select();
+  if (error) {
+    console.log(error);
+  } else {
+    booksCategories.value = data;
+  }
 };
 
 onMounted(() => {
-    getBooksCategories();
-})
-
+  getBooksCategories();
+});
 
 const form = reactive({
-    title: "",
-    author_name: "",
-    description: "",
-    genre: [],
-    thumbnail: "",
-    images: "", // will split by comma
-    price: 0,
-    tags: "", /// will convert to JSON array
-    published_date: "",
-
+  title: "",
+  author_name: "",
+  description: "",
+  genre: [],
+  thumbnail: "",
+  images: "",
+  price: 0,
+  tags: "",
+  published_date: "",
 });
 
 const errors = reactive({
-    title: "",
-    author_name: "",
+  title: "",
+  author_name: "",
 });
 
+// ✅ Validation function
+const validateForm = () => {
+  errors.title = form.title ? "" : "Title is required";
+  errors.author_name = form.author_name ? "" : "Author is required";
+  errors.description = form.description ? "" : "Description is required";
+  errors.thumbnail = form.thumbnail ? "" : "Thumbnail is required";
+  errors.price = form.price ? "" : "Price is required";
+  errors.tags = form.tags ? "" : "Tags are required";
+  errors.published_date = form.published_date ? "" : "Published Date is required";
+
+};
+
+// ✅ Watch form changes (onchange validation)
+watch(
+  () => ({ ...form }),
+  () => validateForm(),
+  { deep: true }
+);
+
+// ✅ Button loading state
+const isSubmitting = ref(false);
+ toast.add({ severity: 'success', summary: 'Success Message', detail: 'Message Content', life: 3000 });
+
 const submitForm = async () => {
-    // Reset errors
-    errors.title = "";
-    errors.author_name = "";
+  validateForm();
 
-    // Validation
-    // let isValid = true;
-    // if (!form.title) {
-    //     errors.title = "Title is required";
-    //     isValid = false;
-    // }
-    // if (!form.author_name) {
-    //     errors.author_name = "Author name is required";
-    //     isValid = false;
-    // }
-    // if (!isValid) return;
+  if (errors.title || errors.author_name) {
+    return; // stop submit if errors exist
+  }
 
-    // Prepare images array
-    // const imagesArray = form.images
-    //     ? form.images.split(",").map((img) => img.trim())
-    //     : [];
+  isSubmitting.value = true;
 
-    // Prepare tags array
+  try {
     const categoriesArray = form.genre
-        ? form.genre.map(tag => tag.code)
-        : null;
+      ? form.genre.map((tag) => tag.code)
+      : null;
 
-
-    console.log(form.thumbnail);
-
-    // Submit to API
     const response = await fetch("/api/books", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            title: form.title,
-            author_name: form.author_name,
-            description: form.description,
-            genre: categoriesArray,
-            thumbnail: form.thumbnail || null,
-            images: form.images || null,
-            price: parseFloat(form.price),
-            tags: form.tags,
-            published_date: form.published_date
-        }),
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: form.title,
+        author_name: form.author_name,
+        description: form.description,
+        genre: categoriesArray,
+        thumbnail: form.thumbnail || null,
+        images: form.images || null,
+        price: parseFloat(form.price),
+        tags: form.tags,
+        published_date: form.published_date,
+      }),
     });
 
     const data = await response.json();
 
-    // if (data.id) {
-    //     navigateTo(`/dashboard/books`);
-    // }
+    // console.log("Saved:", data);
+    // toast
+    if (data.id) {
+      toast.add({ severity: 'success', summary: 'Success Message', detail: 'Book saved successfully', life: 3000 });
+      navigateTo(`/dashboard/books`);
+    }
+  } catch (error) {
+    console.error("Error saving:", error);
+  } finally {
+    isSubmitting.value = false;
+  }
 };
-
-// image upload
 
 </script>

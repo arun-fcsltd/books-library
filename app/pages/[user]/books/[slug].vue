@@ -10,10 +10,10 @@
           <!-- Book Cover -->
           <div class="flex justify-center lg:justify-start">
             <div class="relative group">
-              
+
               <div class="relative">
-               
-                <img :src="book.thumbnail || '/api/placeholder/300/400'" :alt="book.title"
+
+                <img :src="book.thumbnail || '/images/placeholder.png'" :alt="book.title"
                   class="w-64 h-80 object-cover rounded-lg shadow-2xl transform group-hover:scale-105 transition-transform duration-300" />
 
               </div>
@@ -45,10 +45,11 @@
                   <div class="text-sm text-blue-100">Price</div>
                 </div>
                 <div class="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
-                  <div class="text-2xl font-bold">{{book?.published_date ? dayjs(book?.published_date).format('MMM YY') : dayjs(book.created_at).format('YYYY') }}</div>
+                  <div class="text-2xl font-bold">{{ book?.published_date ? dayjs(book?.published_date).format('MMM YY')
+                    : dayjs(book.created_at).format('YYYY') }}</div>
                   <div class="text-sm text-blue-100">Year</div>
                 </div>
-              
+
                 <div class="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
                   <div class="text-2xl font-bold">4.5★</div>
                   <div class="text-sm text-blue-100">Rating</div>
@@ -57,7 +58,7 @@
             </div>
 
             <!-- Action Buttons -->
-            <div class="flex flex-wrap gap-4">  
+            <div class="flex flex-wrap gap-4">
               <button
                 class="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transform hover:scale-105 transition-all duration-200 shadow-lg">
                 <i class="pi pi-book mr-2"></i>
@@ -153,11 +154,13 @@
               </div>
               <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700">
                 <span class="text-gray-600 dark:text-gray-400">Genre</span>
-                <span class="font-semibold text-gray-900 dark:text-white">{{ JSON.parse(book?.genre)?.join(', ') || 'General' }}</span>
+                <span class="font-semibold text-gray-900 dark:text-white">{{ JSON.parse(book?.genre)?.join(', ') ||
+                  'General' }}</span>
               </div>
               <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700">
                 <span class="text-gray-600 dark:text-gray-400">Publication Year</span>
-                <span class="font-semibold text-gray-900 dark:text-white">{{ book?.published_date ? dayjs(book?.published_date).format('MMM YY') : dayjs(book.created_at).format('MMM YY') }}
+                <span class="font-semibold text-gray-900 dark:text-white">{{ book?.published_date ?
+                  dayjs(book?.published_date).format('MMM YY') : dayjs(book.created_at).format('MMM YY') }}
                 </span>
               </div>
               <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700">
@@ -183,7 +186,7 @@
             <div class="space-y-4">
               <div v-for="relatedBook in relatedBooks" :key="relatedBook.id"
                 class="flex space-x-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer">
-                <img :src="relatedBook.thumbnail" :alt="relatedBook.title" class="w-12 h-16 object-cover rounded">
+                <img :src="relatedBook.thumbnail || '/images/placeholder.png'" :alt="relatedBook.title" class="w-12 h-16 object-cover rounded">
                 <div class="flex-1">
                   <h4 class="font-semibold text-gray-900 dark:text-white text-sm">{{ relatedBook.title }}</h4>
                   <p class="text-gray-600 dark:text-gray-400 text-xs">{{ relatedBook.author_name }}</p>
@@ -212,29 +215,6 @@ const relatedBooks = ref([])
 const route = useRoute()
 
 // Sample data for enhanced UI
-const sampleReviews = ref([
-  {
-    id: 1,
-    name: "Sarah Johnson",
-    rating: 5,
-    comment: "Absolutely loved this book! The writing style is engaging and the content is very informative.",
-    date: "2 days ago"
-  },
-  {
-    id: 2,
-    name: "Mike Chen",
-    rating: 4,
-    comment: "Great resource for my studies. Well-structured and easy to understand.",
-    date: "1 week ago"
-  },
-  {
-    id: 3,
-    name: "Emily Davis",
-    rating: 5,
-    comment: "This book changed my perspective completely. Highly recommended!",
-    date: "2 weeks ago"
-  }
-])
 
 
 
@@ -273,7 +253,7 @@ const fetchRelatedBooks = async () => {
     if (error) throw error
     console.log(data, "related books in this page")
     relatedBooks.value = data
-    } catch (error) {
+  } catch (error) {
     console.error('Error fetching related books:', error)
   }
 }

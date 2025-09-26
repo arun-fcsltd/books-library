@@ -1,93 +1,141 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-blue-100 to-gray-100 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+ <div class="min-h-screen bg-gradient-to-br from-blue-100 to-gray-100 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
     <div class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg w-full max-w-md transform transition-all hover:scale-105">
       <!-- Header -->
       <h2 class="text-3xl font-extrabold text-center mb-6 text-gray-900 dark:text-white">
-        <i class="pi pi-sign-in mr-2 text-blue-500"></i> Welcome Back
+        <i class="pi pi-sign-in mr-2 text-blue-500"></i> Sign Up
       </h2>
       <p class="text-center text-sm text-gray-600 dark:text-gray-400 mb-8">
-        Sign in to access your book collection
+        Create an account to access your dashboard
       </p>
 
-      <!-- Form Inputs -->
-      <div class="space-y-5">
+      <form class="space-y-4" @submit.prevent="register">
+        
+        <!-- Full Name -->
         <div>
-          <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
-          <input
-            id="email"
-            type="email"
-            v-model="email"
-            placeholder="Enter your email"
-            class="w-full mt-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 transition duration-200"
-            required
+          <input 
+            v-model="name"
+            type="text" 
+            placeholder="Full Name"
+            class="w-full mt-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 transition duration-200" 
           />
+          <p v-if="errors.name" class="text-red-500 text-sm mt-1">{{ errors.name }}</p>
         </div>
-        <div>
-          <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
-          <input
-            id="password"
-            v-model="password"
-            type="password"
-            placeholder="Enter your password"
-            class="w-full mt-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 transition duration-200"
-            required
-          />
-        </div>
-        <button
-          type="button"
-          @click="signInUser"
-          class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 font-medium transition duration-200"
-        >
-          Sign In
-        </button>
-      </div>
 
-      <!-- Register Link -->
-      <p class="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
-        Don’t have an account?
-        <NuxtLink to="/auth/register" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium">
-          Register now
-        </NuxtLink>
+        <!-- Email -->
+        <div>
+          <input 
+            v-model="email"
+            type="email" 
+            placeholder="Email"
+            class="w-full mt-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 transition duration-200" 
+          />
+          <p v-if="errors.email" class="text-red-500 text-sm mt-1">{{ errors.email }}</p>
+        </div>
+
+        <!-- Password -->
+        <div>
+          <input 
+            v-model="password"
+            type="password" 
+            placeholder="Password"
+            class="w-full mt-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 transition duration-200" 
+          />
+          <p v-if="errors.password" class="text-red-500 text-sm mt-1">{{ errors.password }}</p>
+        </div>
+
+        <!-- Loading Button -->
+        <Button 
+          type="submit" 
+          label="Register" 
+          icon="pi pi-user-plus" 
+          :loading="loading" 
+          class="w-full"
+        />
+      </form>
+
+      <p class="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
+        Already have an account? 
+        <NuxtLink to="/auth/login" class="text-blue-600">Login</NuxtLink>
       </p>
     </div>
   </div>
 </template>
 
 <script setup>
-const client = useSupabaseClient()
+import { ref } from 'vue'
+import { useSupabaseClient } from '#imports'
+import { useRouter } from 'vue-router' // ✅ needed for navigation
+
 definePageMeta({
-  layout: 'guest'
+  layout: 'guest',
 })
 
+const client = useSupabaseClient()
+const router = useRouter()
+
+const name = ref('')
 const email = ref('')
 const password = ref('')
+const errors = ref({ name: '', email: '', password: '' })
+const loading = ref(false) // ✅ only once
 
-const signInUser = async () => {
-  const { data, error } = await client.auth.signInWithPassword({
-    email: email.value,
-    password: password.value
-  })
+// Validation
+const validateForm = () => {
+  errors.value = { name: '', email: '', password: '' }
+  let valid = true
 
-  if (error) {
-    console.error('Login error:', error.message)
-    alert(error.message)
-    return
+  if (!name.value.trim()) {
+    errors.value.name = 'Full name is required'
+    valid = false
+  }
+  if (!email.value.trim()) {
+    errors.value.email = 'Email is required'
+    valid = false
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
+    errors.value.email = 'Enter a valid email address'
+    valid = false
+  }
+  if (!password.value.trim()) {
+    errors.value.password = 'Password is required'
+    valid = false
+  } else if (password.value.length < 6) {
+    errors.value.password = 'Password must be at least 6 characters'
+    valid = false
   }
 
-  console.log('Login success:', data.user)
-  alert(`Welcome ${data.user.email}!`)
-  navigateTo('/dashboard')
+  return valid
+}
+
+// Register
+const register = async () => {
+  if (!validateForm()) return
+  loading.value = true
+
+  try {
+    const { data, error } = await client.auth.signUp({
+      email: email.value,
+      password: password.value,
+      options: {
+        data: { full_name: name.value }
+      }
+    })
+
+    if (error) {
+      errors.value.email = error.message
+      loading.value = false
+      return
+    }
+
+    console.log('Registration success:', data)
+    alert('Registration successful! Please check your email for verification.')
+    router.push('/auth/login')
+
+  } catch (err) {
+    console.error('Unexpected error:', err)
+    alert('Something went wrong, please try again.')
+  } finally {
+    loading.value = false
+  }
 }
 </script>
-
-<style scoped>
-/* Custom hover effects for inputs */
-input:focus {
-  outline: none;
-}
-
-/* Smooth transitions for the card */
-.transform {
-  transition: transform 0.3s ease-in-out;
-}
-</style>

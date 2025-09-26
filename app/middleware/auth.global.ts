@@ -1,7 +1,7 @@
 export default defineNuxtRouteMiddleware((to, from) => {
 
   const user = useSupabaseUser();
-
+ 
   if (to.path.startsWith('/dashboard')) {
     if (!user.value) {
       //user isn't logged in and trying to access dashboard
