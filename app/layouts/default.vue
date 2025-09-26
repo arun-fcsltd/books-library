@@ -9,7 +9,7 @@
       <nav class="mt-4">
         <ul class="space-y-2">
           <li>
-            <nuxt-link to="/dashboard"
+            <nuxt-link :to="`/admin`"
               class="flex items-center px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md transition">
               <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -19,7 +19,7 @@
             </nuxt-link>
           </li>
           <li>
-            <nuxt-link to="/dashboard/books"
+            <nuxt-link :to="`/admin/books`"
               class="flex items-center px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md transition">
               <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -52,35 +52,31 @@
         </div>
         <div class="flex items-center space-x-4">
           <!-- Color mode switcher -->
-           
-       <div>
-  <ToggleButton
-    v-model="isDark"
-    :onLabel="''"
-    :offLabel="''"
-    class="w-14 h-8 rounded-full relative transition-colors duration-300"
-    :class="isDark 
-      ? 'bg-gray-800 border-gray-700' 
-      : 'bg-yellow-400 border-yellow-300'"
-  >
-    <template #default>
-      <span
-        class="absolute top-1 left-1 w-6 h-6 flex items-center justify-center rounded-full transition-transform duration-300"
-        :class="isDark 
-          ? 'translate-x-6 bg-gray-900 text-white' 
-          : 'translate-x-0 bg-white text-yellow-500'"
-      >
-        {{ isDark ? '🌙' : '☀️' }}
-      </span>
-    </template>
-  </ToggleButton>
-</div>
+
+          <div>
+            <ToggleButton v-model="isDark" :onLabel="''" :offLabel="''"
+              class="w-14 h-8 rounded-full relative transition-colors duration-300" :class="isDark
+                ? 'bg-gray-800 border-gray-700'
+                : 'bg-yellow-400 border-yellow-300'">
+              <template #default>
+                <span
+                  class="absolute top-1 left-1 w-6 h-6 flex items-center justify-center rounded-full transition-transform duration-300"
+                  :class="isDark
+                    ? 'translate-x-6 bg-gray-900 text-white'
+                    : 'translate-x-0 bg-white text-yellow-500'">
+                  {{ isDark ? '🌙' : '☀️' }}
+                </span>
+              </template>
+            </ToggleButton>
+          </div>
 
 
           <!-- User avatar -->
           <div class="relative">
             <button class="flex items-center" @click="toggle">
-              <img src="https://placehold.co/40x40/png" alt="User"
+
+              <img
+                :src="user.avatar_url || `https://ui-avatars.com/api/?name=${user.first_name} ${user.last_name}&background=random&color=random`"
                 class="w-8 h-8 rounded-full border border-gray-300 dark:border-gray-600" />
             </button>
           </div>
@@ -93,16 +89,19 @@
           <div>
             <ul class="list-none p-0 m-0 flex flex-col gap-4">
               <li class="flex items-center gap-2">
-                <img src="https://placehold.co/400" style="width: 32px" class="rounded-full" />
+                <img
+                  :src="user.avatar_url || `https://ui-avatars.com/api/?name=${user.first_name} ${user.last_name}&background=random&color=random`"
+                  style="width: 32px" class="rounded-full" />
                 <div>
-                  <span class="font-medium">{{ user_metadata.full_name }}</span>
-                  <div class="text-sm text-gray-500 dark:text-gray-400">{{ user_metadata.email }}</div>
+                  <span class="font-medium">{{ user.first_name }} {{ user.last_name }}</span>
+                  <div class="text-sm text-gray-500 dark:text-gray-400">{{ user.email }}</div>
                 </div>
               </li>
               <li class="flex items-center gap-2">
-                <img src="https://placehold.co/400" style="width: 32px" class="rounded-full opacity-0" />
+
                 <div>
-                  <Button label="Logout" severity="danger" class="p-button-outlined p-button-sm" @click="logout" />
+                  <Button label="Logout" severity="danger" class="p-button-outlined p-button-sm"
+                    @click="handlelogout" />
                 </div>
               </li>
             </ul>
@@ -112,14 +111,13 @@
 
       <!-- Content -->
       <main class="p-6">
-
-
-
         <slot />
       </main>
     </div>
   </div>
-   <Toast />
+  <Toast />
+  <ConfirmPopup />
+
 </template>
 
 <script setup>
@@ -128,14 +126,12 @@ import Popover from 'primevue/popover'
 import Button from 'primevue/button'
 import ToggleButton from 'primevue/togglebutton';
 import MyBreadcrumb from '~/components/common/MyBreadcrumb.vue';
-import Toast from "primevue/toast";
+import useNotify from '~/composables/useNotify';
 
-const client = useSupabaseClient()
-const user = useSupabaseUser()
-const { user_metadata, role, id } = user.value
 
-console.log("Default layout user:")
+const { user, logout } = useAuth()
 
+const { showToast, confirmDialog } = useNotify()
 
 
 const isSidebarOpen = ref(false)
@@ -158,9 +154,30 @@ watch(() => colorMode.preference, (val) => {
 const op = ref()
 const toggle = (event) => { op.value.toggle(event) }
 
-const logout = async () => {
-  await client.auth.signOut()
-  navigateTo('/')
+const handlelogout = async () => {
+  confirmDialog({
+    message: 'Are you sure you want to logout?',
+    header: 'Logout Confirmation',
+    icon: 'pi pi-exclamation-triangle',
+    accept: async () => {
+      showToast({
+        severity: 'success',
+        summary: 'Logout Successful',
+        detail: 'You have successfully logged out.',
+        life: 3000,
+      })
+      await logout()
+      navigateTo('/')
+    },
+    reject: () => { 
+      showToast({
+        severity: 'warn',
+        summary: 'Logout Cancelled',
+        detail: 'You have cancelled the logout process.',
+        life: 3000,
+      })
+    }
+  })
 }
 
 
@@ -168,9 +185,8 @@ const logout = async () => {
 </script>
 
 <style scoped>
-
-.p-togglebutton-content, span.p-togglebutton-content {
-  background: #000000!important;
+.p-togglebutton-content,
+span.p-togglebutton-content {
+  background: #000000 !important;
 }
-
 </style>

@@ -101,7 +101,7 @@
     <StatsSection />
 
     <!-- Services Section -->
-    <ServicesSection />
+    <ServiceSection />
 
     <!-- Study Spaces Section -->
     <section class="py-20 bg-gradient-to-r from-gray-900 to-gray-800 text-white">
@@ -281,10 +281,17 @@
 
 <script setup>
 import HomeBookCard from "~/components/home/HomeBookCard.vue"
+import StatsSection from "~/components/home/StatsSection.vue"
+import ServiceSection from "~/components/home/ServiceSection.vue"
+import TestimonialsSection from "~/components/home/TestimonialsSection.vue"
+
+
 
 definePageMeta({
-  layout: 'guest'
+  layout: 'guest',
 })
+
+
 
 const client = useSupabaseClient()
 const featuredBooks = ref([])

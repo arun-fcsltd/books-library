@@ -8,7 +8,7 @@
     { name: 'Dashboard', to: '', icon: 'pi pi-home' },
     { name: 'Books', to: '#' }
   ]" :actions="[
-      { name: 'Add Book', type: 'link', to: '/dashboard/books/create', icon: 'pi pi-plus' },
+      { name: 'Add Book', type: 'link', to: `/${user.role}/books/create`, icon: 'pi pi-plus' },
     ]" @action="handleAction" />
 
   <section

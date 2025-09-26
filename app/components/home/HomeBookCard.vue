@@ -39,7 +39,7 @@
     <!-- Actions -->
     <div class="flex items-center justify-between mt-4">
       <div class="flex gap-3">
-        <NuxtLink :to="`/books/${book.slug}`"
+        <NuxtLink :to="`/admin/books/${book.slug}`"
           class="text-sm px-4 py-2 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300 dark:hover:bg-blue-800 transition font-medium">
           <i class="pi pi-eye mr-1"></i> View
         </NuxtLink>
@@ -48,7 +48,7 @@
 
       <div v-if="edit" class="flex justify-end">
 
-        <NuxtLink :to="`/dashboard/books/edit/${book.slug}`"
+        <NuxtLink :to="`/admin/books/edit/${book.slug}`" 
           class="text-sm mr-2 px-4 py-2 rounded-lg bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900 dark:text-green-300 dark:hover:bg-green-800 transition font-medium">
           <i class="pi pi-pencil mr-1"></i> Edit
         </NuxtLink>
@@ -66,6 +66,7 @@
 </template>
 
 <script setup>
+const { user } = useAuth()
 defineProps({
   edit: {
     type: Boolean,

@@ -216,7 +216,7 @@ const route = useRoute()
 
 // Sample data for enhanced UI
 
-
+const sampleReviews = [];
 
 // Format category names
 const formatCategory = (category) => {

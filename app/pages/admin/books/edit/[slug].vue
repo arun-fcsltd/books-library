@@ -37,7 +37,7 @@
             accept="image/*" />
 
         <!-- Price -->
-        <InputNumber v-model="form.price" mode="decimal" minFractionDigits="0" maxFractionDigits="2"
+        <InputNumber v-model="form.price" mode="decimal" :minFractionDigits=0 :maxFractionDigits=2
             placeholder="Enter price" class="w-full" />
 
         <DatePicker v-model="form.published_date" class="w-full" placeholder="Select date" />
