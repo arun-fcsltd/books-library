@@ -137,7 +137,6 @@ watch(
 
 // ✅ Button loading state
 const isSubmitting = ref(false);
- toast.add({ severity: 'success', summary: 'Success Message', detail: 'Message Content', life: 3000 });
 
 const submitForm = async () => {
   validateForm();
@@ -175,7 +174,7 @@ const submitForm = async () => {
     // toast
     if (data.id) {
       toast.add({ severity: 'success', summary: 'Success Message', detail: 'Book saved successfully', life: 3000 });
-      navigateTo(`/dashboard/books`);
+      navigateTo(`/admin/books`);
     }
   } catch (error) {
     console.error("Error saving:", error);

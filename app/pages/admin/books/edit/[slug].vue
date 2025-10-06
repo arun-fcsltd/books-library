@@ -151,7 +151,7 @@ const submitForm = async () => {
     });
     const data = await res.json();
 
-    if (data.slug) router.push(`/dashboard/books/${data.slug}`);
+    if (data.slug) router.push(`/admin/books`);
 };
 
 onMounted(() => {

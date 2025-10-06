@@ -8,7 +8,7 @@
     { name: 'Dashboard', to: '', icon: 'pi pi-home' },
     { name: 'Books', to: '#' }
   ]" :actions="[
-      { name: 'Add Book', type: 'link', to: `/${user.role}/books/create`, icon: 'pi pi-plus' },
+      { name: 'Add Book', type: 'link', to: `/admin/books/create`, icon: 'pi pi-plus' },
     ]" @action="handleAction" />
 
   <section
@@ -23,7 +23,7 @@
       </h1>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
       <HomeBookCard v-for="book in books" :key="book.id" :book="book"
         class="bg-gray-100 dark:bg-gray-800 p-4 rounded-xl shadow hover:shadow-lg transition relative"
         @delete="(event) => showTemplate(event, book.id)" :edit="true" />

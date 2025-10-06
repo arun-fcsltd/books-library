@@ -190,10 +190,10 @@
                 <div class="flex-1">
                   <h4 class="font-semibold text-gray-900 dark:text-white text-sm">{{ relatedBook.title }}</h4>
                   <p class="text-gray-600 dark:text-gray-400 text-xs">{{ relatedBook.author_name }}</p>
-                  <div class="flex items-center mt-1">
+                  <!-- <div class="flex items-center mt-1">
                     <span class="text-yellow-500 text-xs">★</span>
                     <span class="text-gray-500 text-xs ml-1">{{ relatedBook.rating }}</span>
-                  </div>
+                  </div> -->
                 </div>
               </div>
             </div>

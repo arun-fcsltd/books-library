@@ -1,6 +1,6 @@
 <template>
   <div
-    class="p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm hover:shadow-xl 
+    class=" p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm hover:shadow-xl 
     transition transform hover:-translate-y-1 max-w-sm w-full mx-auto mb-4">
     <!-- Thumbnail -->
     <div class="mb-4">
@@ -39,7 +39,7 @@
     <!-- Actions -->
     <div class="flex items-center justify-between mt-4">
       <div class="flex gap-3">
-        <NuxtLink :to="`/admin/books/${book.slug}`"
+        <NuxtLink :to="`/books/${book.slug}`"
           class="text-sm px-4 py-2 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300 dark:hover:bg-blue-800 transition font-medium">
           <i class="pi pi-eye mr-1"></i> View
         </NuxtLink>
@@ -66,6 +66,8 @@
 </template>
 
 <script setup>
+
+
 const { user } = useAuth()
 defineProps({
   edit: {
